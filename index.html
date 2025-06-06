@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeuApp - Aprendizado Multilíngue</title>
+    <title>Jogo Educativo</title>
     <style>
         * {
             margin: 0;
@@ -13,14 +13,15 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            user-select: none;
         }
 
         .container {
-            max-width: 400px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             min-height: 100vh;
@@ -28,370 +29,233 @@
             flex-direction: column;
         }
 
-        .tab-navigation {
-            display: flex;
-            background: white;
-            border-radius: 15px;
-            padding: 5px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px 8px;
-            border: none;
-            background: transparent;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .tab-btn.active {
-            background: #1cb0f6;
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
         .header {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
             text-align: center;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            flex: 1;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .question-display {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.5em;
+            color: #4a5568;
+            margin-bottom: 20px;
+            line-height: 1.4;
         }
 
         .progress-bar {
             width: 100%;
-            height: 12px;
-            background: #e0e0e0;
-            border-radius: 6px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
             overflow: hidden;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #58cc02, #7cb342);
-            border-radius: 6px;
-            transition: width 0.5s ease;
-            width: 0%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            transition: width 0.3s ease;
         }
 
-        .score {
-            font-size: 18px;
-            font-weight: bold;
-            color: #58cc02;
-        }
-
-        .streak {
+        .word-bank {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-wrap: wrap;
             gap: 10px;
-            margin-top: 10px;
-        }
-
-        .category-selector,
-        .language-selector {
-            background: white;
-            border-radius: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            min-height: 80px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: #f7fafc;
+            border-radius: 15px;
+            border: 2px dashed #cbd5e0;
         }
 
-        .category-selector h3,
-        .language-selector h3 {
-            margin-bottom: 15px;
-            text-align: center;
-            color: #333;
-        }
-
-        .category-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .category-btn {
-            padding: 15px;
-            border: 2px solid #e5e5e5;
-            border-radius: 12px;
-            background: #f7f7f7;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        .category-btn.selected {
-            border-color: #1cb0f6;
-            background: #e7f3ff;
-            color: #1cb0f6;
-        }
-
-        .language-options {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .language-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e5e5e5;
-            border-radius: 10px;
-            background: #f7f7f7;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .language-btn.selected {
-            border-color: #58cc02;
-            background: #d7ffb8;
-            color: #58cc02;
-        }
-
-        .question-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .question-language {
-            background: #e7f3ff;
-            color: #1cb0f6;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .audio-btn {
-            background: #58cc02;
+        .word-chip {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 18px;
             transition: all 0.3s ease;
+            font-weight: bold;
+            border: none;
+            font-size: 1em;
+            min-width: 45px;
+            text-align: center;
         }
 
-        .audio-btn:hover {
-            background: #46a302;
+        .word-chip.letter {
+            padding: 15px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .word-chip:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .word-chip.selected {
+            background: linear-gradient(45deg, #48bb78, #38a169);
             transform: scale(1.1);
         }
 
-        .question-text {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 30px;
-            text-align: center;
-            line-height: 1.4;
-            color: #2b2b2b;
-        }
-
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .option {
-            background: #f7f7f7;
-            border: 3px solid #e5e5e5;
+        .answer-area {
+            min-height: 100px;
+            padding: 20px;
+            background: #f7fafc;
             border-radius: 15px;
-            padding: 18px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-weight: 500;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
             align-items: center;
+            justify-content: center;
         }
 
-        .option:hover {
-            border-color: #b7b7b7;
-            transform: translateY(-2px);
+        .answer-area.correct {
+            border-color: #48bb78;
+            background: #f0fff4;
         }
 
-        .option.selected {
-            border-color: #1cb0f6;
-            background: #e7f3ff;
-            color: #1cb0f6;
+        .answer-area.incorrect {
+            border-color: #f56565;
+            background: #fff5f5;
         }
 
-        .option.correct {
-            border-color: #58cc02;
-            background: #d7ffb8;
-            color: #58cc02;
+        .game-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .option.incorrect {
-            border-color: #ff4b4b;
-            background: #ffeaa7;
-            color: #ff4b4b;
-        }
-
-        .option-audio {
-            background: transparent;
+        .game-btn {
+            padding: 15px 30px;
             border: none;
-            color: inherit;
-            font-size: 16px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
-        }
-
-        .option-audio:hover {
-            opacity: 1;
-        }
-
-        .check-btn {
-            background: #58cc02;
-            color: white;
-            border: none;
-            border-radius: 15px;
-            padding: 18px;
-            font-size: 18px;
-            font-weight: 600;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: auto;
+            min-width: 120px;
         }
 
-        .check-btn:hover {
-            background: #46a302;
+        .btn-check {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .btn-clear {
+            background: linear-gradient(45deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .game-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .check-btn:disabled {
-            background: #e5e5e5;
-            color: #b7b7b7;
+        .game-btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
 
-        .start-btn {
-            background: #1cb0f6;
-            color: white;
-            border: none;
-            border-radius: 15px;
-            padding: 18px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-        }
-
-        .start-btn:hover {
-            background: #0f9de8;
-            transform: translateY(-2px);
-        }
-
-        .feedback {
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            text-align: center;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .feedback.correct {
-            background: #d7ffb8;
-            color: #58cc02;
-            border: 2px solid #58cc02;
-        }
-
-        .feedback.incorrect {
-            background: #ffeaa7;
-            color: #ff4b4b;
-            border: 2px solid #ff4b4b;
-        }
-
-        .completion-screen {
-            text-align: center;
-            background: white;
-            border-radius: 20px;
-            padding: 40px 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .completion-screen h2 {
-            color: #58cc02;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-
-        .final-score {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 30px;
-        }
-
-        .restart-btn {
-            background: #1cb0f6;
-            color: white;
-            border: none;
-            border-radius: 15px;
-            padding: 18px 30px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .restart-btn:hover {
-            background: #0f9de8;
-            transform: translateY(-2px);
-        }
-
-        .hidden {
+        .admin-panel {
             display: none;
         }
 
-        /* Editor de Perguntas */
-        .editor-form {
-            background: white;
-            border-radius: 20px;
-            padding: 30px 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        .admin-panel.active {
+            display: block;
         }
 
         .form-group {
@@ -401,131 +265,202 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
+            font-weight: bold;
+            color: #4a5568;
         }
 
         .form-group input,
-        .form-group select,
         .form-group textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e5e5e5;
+            border: 2px solid #e2e8f0;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 1em;
             transition: border-color 0.3s ease;
         }
 
         .form-group input:focus,
-        .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #1cb0f6;
-        }
-
-        .option-input {
-            margin-bottom: 10px;
-        }
-
-        .add-question-btn {
-            background: #58cc02;
-            color: white;
-            border: none;
-            border-radius: 15px;
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .add-question-btn:hover {
-            background: #46a302;
-            transform: translateY(-2px);
+            border-color: #667eea;
         }
 
         .questions-list {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            background: #f7fafc;
+        }
 
-            /* Adicionado para rolagem */
-            max-height: 600px;
-            /* ajuste conforme necessário */
+        .question-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .question-content {
+            flex: 1;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 15px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-small:hover {
+            transform: scale(1.05);
+        }
+
+        .file-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
             overflow-y: auto;
         }
 
-
-        .question-item {
-            padding: 15px;
-            border: 1px solid #e5e5e5;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            background: #f9f9f9;
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .question-delete {
-            background: #ff4b4b;
-            color: white;
+        .modal-title {
+            font-size: 1.5em;
+            color: #4a5568;
+        }
+
+        .close-btn {
+            background: none;
             border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-size: 12px;
+            font-size: 1.5em;
             cursor: pointer;
-            float: right;
+            color: #666;
         }
 
-        .question-edit {
-            background: #1cb0f6;
-            color: white;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            margin-left: 5px;
-            font-size: 12px;
-        }
-
-        .question-edit:hover {
-            background: #0e94d1;
-        }
-
-        .import-export-btn {
-            background: #58cc02;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            margin: 0 10px;
-            font-size: 14px;
+        .feedback {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 15px;
+            font-size: 1.2em;
             font-weight: bold;
         }
 
-        .import-export-btn:hover {
-            background: #46a302;
+        .feedback.correct {
+            background: #f0fff4;
+            color: #38a169;
+            border: 2px solid #48bb78;
         }
 
-        @media (max-width: 480px) {
+        .feedback.incorrect {
+            background: #fff5f5;
+            color: #e53e3e;
+            border: 2px solid #f56565;
+        }
+
+        @media (max-width: 768px) {
             .container {
-                padding: 15px;
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .nav-btn {
+                min-width: auto;
+            }
+
+            .game-area {
+                padding: 20px;
             }
 
             .question-text {
-                font-size: 20px;
+                font-size: 1.2em;
             }
 
-            .option {
-                padding: 15px;
-                font-size: 15px;
+            .word-chip {
+                padding: 10px 15px;
+                font-size: 0.9em;
             }
 
-            .tab-btn {
-                font-size: 12px;
-                padding: 10px 5px;
+            .game-buttons {
+                flex-direction: column;
+            }
+
+            .game-btn {
+                min-width: auto;
+            }
+
+            .stats {
+                flex-direction: row;
+                gap: 10px;
             }
         }
     </style>
@@ -533,824 +468,796 @@
 
 <body>
     <div class="container">
-        <!-- Navegação por Abas -->
-        <div class="tab-navigation">
-            <button class="tab-btn active" onclick="switchTab('study')">🎯 Estudar</button>
-            <button class="tab-btn" onclick="switchTab('create')">➕ Criar</button>
-            <button class="tab-btn" onclick="switchTab('manage')">📝 Gerenciar</button>
+        <div class="header">
+            <h1>🎯 Jogo Educativo</h1>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="totalQuestions">0</div>
+                    <div class="stat-label">Perguntas</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="correctAnswers">0</div>
+                    <div class="stat-label">Acertos</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="accuracy">0%</div>
+                    <div class="stat-label">Precisão</div>
+                </div>
+            </div>
         </div>
 
-        <!-- Aba de Estudo -->
-        <div id="studyTab" class="tab-content active">
-            <!-- Seletor de Categoria -->
-            <div class="category-selector" id="categorySelector">
-                <h3>Escolha uma Categoria</h3>
-                <div class="category-grid" id="categoryGrid"></div>
-            </div>
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showGame()">🎮 Jogar</button>
+            <button class="nav-btn" onclick="showAdmin()">⚙️ Gerenciar</button>
+        </div>
 
-            <!-- Seletor de Idioma -->
-            <div class="language-selector hidden" id="languageSelector">
-                <h3>Configurar Idiomas</h3>
-                <div>
-                    <label>Pergunta em:</label>
-                    <div class="language-options">
-                        <button class="language-btn selected" data-lang="pt" onclick="selectQuestionLang('pt')">🇧🇷
-                            Português</button>
-                        <button class="language-btn" data-lang="en" onclick="selectQuestionLang('en')">🇺🇸
-                            Inglês</button>
+        <div class="game-area">
+            <!-- Área do Jogo -->
+            <div id="gamePanel">
+                <div class="question-display">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar"></div>
                     </div>
+                    <div class="question-text" id="questionText">Clique em "Iniciar Jogo" para começar!</div>
                 </div>
-                <div>
-                    <label>Resposta em:</label>
-                    <div class="language-options">
-                        <button class="language-btn selected" data-lang="pt" onclick="selectAnswerLang('pt')">🇧🇷
-                            Português</button>
-                        <button class="language-btn" data-lang="en" onclick="selectAnswerLang('en')">🇺🇸
-                            Inglês</button>
-                    </div>
+
+                <div class="word-bank" id="wordBank"></div>
+
+                <div class="answer-area" id="answerArea"></div>
+
+                <div class="game-buttons">
+                    <button class="game-btn btn-check" id="checkBtn" onclick="checkAnswer()" disabled>✓
+                        Verificar</button>
+                    <button class="game-btn btn-clear" onclick="clearAnswer()">🗑️ Limpar</button>
+                    <button class="game-btn btn-next" onclick="startGame()">▶️ Iniciar Jogo</button>
                 </div>
-                <button class="start-btn" onclick="startQuiz()">INICIAR QUIZ</button>
+
+                <div id="feedback" class="feedback" style="display: none;"></div>
             </div>
 
-            <!-- Header do Quiz -->
-            <div class="header hidden" id="quizHeader">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+            <!-- Painel Administrativo -->
+            <div id="adminPanel" class="admin-panel">
+                <div class="file-buttons">
+                    <button class="nav-btn" onclick="document.getElementById('importFile').click()">📁 Importar</button>
+                    <button class="nav-btn" onclick="exportQuestions()">💾 Exportar</button>
+                    <button class="nav-btn" onclick="clearAllData()">🗑️ Limpar Tudo</button>
                 </div>
-                <div class="score">Pontuação: <span id="score">0</span></div>
-                <div class="streak">
-                    <span class="streak-fire">🔥</span>
-                    <span>Sequência: <span id="streak">0</span></span>
-                </div>
-            </div>
 
-            <!-- Card da Pergunta -->
-            <div class="question-card hidden" id="questionCard">
-                <div class="question-header">
-                    <div class="question-language" id="questionLangIndicator"></div>
-                    <button class="audio-btn" id="questionAudioBtn" onclick="playQuestionAudio()">🔊</button>
-                </div>
-                <div class="question-text" id="questionText"></div>
-                <div class="options" id="optionsContainer"></div>
-                <div class="feedback hidden" id="feedback"></div>
-                <button class="check-btn" id="checkBtn" disabled>VERIFICAR</button>
-            </div>
+                <input type="file" id="importFile" class="file-input" accept=".json" onchange="importQuestions(event)">
 
-            <!-- Tela de Conclusão -->
-            <div class="completion-screen hidden" id="completionScreen">
-                <h2>🎉 Parabéns!</h2>
-                <div class="final-score" id="finalScore"></div>
-                <button class="restart-btn" id="restartBtn">REINICIAR</button>
-                <button class="restart-btn" onclick="goToCategories()"
-                    style="background: #1cb0f6; margin-left: 10px;">NOVA CATEGORIA</button>
+                <div class="form-group">
+                    <!-- <label for="questionInput">Pergunta:</label> -->
+                    <label for="questionLanguage">Pergunta, Idioma da Pergunta:</label>
+                    <select id="questionLanguage">
+                        <option value="português">Português</option>
+                        <option value="inglês">Inglês</option>
+                        <option value="espanhol">Espanhol</option>
+                        <option value="francês">Francês</option>
+                        <option value="italiano">Italiano</option>
+                    </select>
+                    <input type="text" id="questionInput" placeholder="Digite a pergunta aqui...">
+                </div>
+
+                <div class="form-group">
+                    <!-- <label for="answerInput">Resposta:</label> -->
+                    <label for="answerLanguage">Resposta, Idioma da Resposta:</label>
+                    <select id="answerLanguage">
+                        <option value="português">Português</option>
+                        <option value="inglês">Inglês</option>
+                        <option value="espanhol">Espanhol</option>
+                        <option value="francês">Francês</option>
+                        <option value="italiano">Italiano</option>
+                    </select>
+                    <input type="text" id="answerInput" placeholder="Digite a resposta aqui...">
+
+
+
+                </div>
+
+                <div class="form-group">
+                    <label for="gameType">Tipo de Jogo:</label>
+                    <select id="gameType" onchange="toggleGameType()">
+                        <option value="words">Palavras</option>
+                        <option value="letters">Letras</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="wordsGroup">
+                    <label for="wordsInput">Palavras para escolha (separadas por vírgula):</label>
+                    <textarea id="wordsInput" rows="3" placeholder="palavra1, palavra2, palavra3, ..."></textarea>
+                </div>
+
+                <div class="form-group" id="lettersGroup" style="display: none;">
+                    <label for="lettersInput">Letras extras (opcional - separadas por vírgula):</label>
+                    <textarea id="lettersInput" rows="2" placeholder="a, b, c, x, y, z, ..."></textarea>
+                    <small style="color: #666; margin-top: 5px; display: block;">
+                        As letras da resposta são incluídas automaticamente. Adicione letras extras para aumentar a
+                        dificuldade.
+                    </small>
+                </div>
+
+                <div class="game-buttons">
+                    <button class="game-btn btn-check" onclick="addQuestion()">➕ Adicionar</button>
+                    <button class="game-btn btn-clear" onclick="clearForm()">🧹 Limpar Campos</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Perguntas Cadastradas:</label>
+                    <div class="questions-list" id="questionsList"></div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Aba de Criar Perguntas -->
-        <div id="createTab" class="tab-content">
-            <div class="editor-form">
-                <h2 style="text-align: center; margin-bottom: 30px; color: #333;">✨ Criar Nova Pergunta</h2>
-
-                <div class="form-group">
-                    <label>Categoria:</label>
-                    <select id="newQuestionCategory">
-                        <option value="geral">Geral</option>
-                        <option value="matematica">Matemática</option>
-                        <option value="historia">História</option>
-                        <option value="ciencias">Ciências</option>
-                        <option value="geografia">Geografia</option>
-                        <option value="idiomas">Idiomas</option>
-                        <option value="literatura">Literatura</option>
-                        <option value="tecnologia">Tecnologia</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Idioma da Pergunta:</label>
-                    <select id="newQuestionLang">
-                        <option value="pt">Português</option>
-                        <option value="en">Inglês</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Pergunta:</label>
-                    <textarea id="newQuestionText" rows="3" placeholder="Digite sua pergunta aqui..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Opções de Resposta:</label>
-                    <input type="text" id="option1" class="option-input" placeholder="Opção 1">
-                    <input type="text" id="option2" class="option-input" placeholder="Opção 2">
-                    <input type="text" id="option3" class="option-input" placeholder="Opção 3">
-                    <input type="text" id="option4" class="option-input" placeholder="Opção 4">
-                </div>
-
-                <div class="form-group">
-                    <label>Resposta Correta:</label>
-                    <select id="correctAnswer">
-                        <option value="0">Opção 1</option>
-                        <option value="1">Opção 2</option>
-                        <option value="2">Opção 3</option>
-                        <option value="3">Opção 4</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Idioma das Respostas:</label>
-                    <select id="newAnswerLang">
-                        <option value="pt">Português</option>
-                        <option value="en">Inglês</option>
-                    </select>
-                </div>
-
-                <button class="add-question-btn" onclick="addNewQuestion()">ADICIONAR PERGUNTA</button>
+    <!-- Modal de Edição -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Pergunta</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
             </div>
-        </div>
 
-        <!-- Aba de Gerenciar Perguntas -->
-        <div id="manageTab" class="tab-content">
-            <div class="questions-list">
-                <h2 style="text-align: center; margin-bottom: 20px; color: #333;">📚 Minhas Perguntas</h2>
-                <!-- Adicionar botões de Import/Export no HTML -->
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <button class="import-export-btn" onclick="exportQuestions()">📤 Exportar Perguntas</button>
-                    <button class="import-export-btn" onclick="document.getElementById('importFile').click()">📥
-                        Importar Perguntas</button>
-                    <input type="file" id="importFile" accept=".json" style="display: none;"
-                        onchange="importQuestions(event)">
-                </div>
-                <div id="questionsList"></div>
+            <div class="form-group">
+                <!-- <label for="editQuestion">Pergunta:</label> -->
+                <label for="editQuestionLanguage">Pergunta, Idioma da Pergunta:</label>
+                <select id="editQuestionLanguage">
+                    <option value="português">Português</option>
+                    <option value="inglês">Inglês</option>
+                    <option value="espanhol">Espanhol</option>
+                    <option value="francês">Francês</option>
+                    <option value="italiano">Italiano</option>
+                </select>
+                <input type="text" id="editQuestion">
+            </div>
+
+            <div class="form-group">
+                <!-- <label for="editAnswer">Resposta:</label> -->
+                <label for="editAnswerLanguage">Resposta, Idioma da Resposta:</label>
+                <select id="editAnswerLanguage">
+                    <option value="português">Português</option>
+                    <option value="inglês">Inglês</option>
+                    <option value="espanhol">Espanhol</option>
+                    <option value="francês">Francês</option>
+                    <option value="italiano">Italiano</option>
+                </select>
+                <input type="text" id="editAnswer">
+            </div>
+
+            <div class="form-group">
+                <label for="editGameType">Tipo de Jogo:</label>
+                <select id="editGameType" onchange="toggleEditGameType()">
+                    <option value="words">Palavras</option>
+                    <option value="letters">Letras</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="editWordsGroup">
+                <label for="editWords">Palavras (separadas por vírgula):</label>
+                <textarea id="editWords" rows="3"></textarea>
+            </div>
+
+            <div class="form-group" id="editLettersGroup" style="display: none;">
+                <label for="editLetters">Letras extras (separadas por vírgula):</label>
+                <textarea id="editLetters" rows="2"></textarea>
+            </div>
+
+            <div class="game-buttons">
+                <button class="game-btn btn-check" onclick="saveEdit()">💾 Salvar</button>
+                <button class="game-btn btn-clear" onclick="closeEditModal()">❌ Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Base de dados de perguntas organizadas por categoria
-        let questionsDatabase = {
-            geral: [
-                {
-                    question: "Qual é a capital do Brasil?",
-                    options: ["São Paulo", "Rio de Janeiro", "Brasília", "Belo Horizonte"],
-                    correct: 2,
-                    questionLang: "pt",
-                    answerLang: "pt"
-                },
-                {
-                    question: "What is the capital of Brazil?",
-                    options: ["São Paulo", "Rio de Janeiro", "Brasília", "Belo Horizonte"],
-                    correct: 2,
-                    questionLang: "en",
-                    answerLang: "pt"
-                }
-            ],
-            matematica: [
-                {
-                    question: "Quanto é 15 + 27?",
-                    options: ["42", "41", "43", "40"],
-                    correct: 0,
-                    questionLang: "pt",
-                    answerLang: "pt"
-                },
-                {
-                    question: "What is 15 + 27?",
-                    options: ["forty-two", "forty-one", "forty-three", "forty"],
-                    correct: 0,
-                    questionLang: "en",
-                    answerLang: "en"
-                }
-            ],
-            ciencias: [
-                {
-                    question: "Qual planeta é conhecido como 'Planeta Vermelho'?",
-                    options: ["Vênus", "Marte", "Júpiter", "Saturno"],
-                    correct: 1,
-                    questionLang: "pt",
-                    answerLang: "pt"
-                },
-                {
-                    question: "Which planet is known as the 'Red Planet'?",
-                    options: ["Venus", "Mars", "Jupiter", "Saturn"],
-                    correct: 1,
-                    questionLang: "en",
-                    answerLang: "en"
-                }
-            ],
-            idiomas: [
-                {
-                    question: "Como se diz 'Olá' em inglês?",
-                    options: ["Hello", "Goodbye", "Please", "Thank you"],
-                    correct: 0,
-                    questionLang: "pt",
-                    answerLang: "en"
-                },
-                {
-                    question: "How do you say 'Obrigado' in English?",
-                    options: ["Please", "Sorry", "Thank you", "Welcome"],
-                    correct: 2,
-                    questionLang: "en",
-                    answerLang: "en"
-                }
-            ]
-        };
-
-        // Variáveis do jogo
-        let currentCategory = '';
-        let currentQuestions = [];
-        let currentQuestion = 0;
-        let score = 0;
-        let streak = 0;
-        let selectedOption = -1;
-        let questionLang = 'pt';
-        let answerLang = 'pt';
-        // let speechSynthesis = window.speechSynthesis;
-
-        // Elementos do DOM
-        const categoryGrid = document.getElementById('categoryGrid');
-        const categorySelector = document.getElementById('categorySelector');
-        const languageSelector = document.getElementById('languageSelector');
-        const quizHeader = document.getElementById('quizHeader');
-        const questionCard = document.getElementById('questionCard');
-        const completionScreen = document.getElementById('completionScreen');
-        const questionText = document.getElementById('questionText');
-        const optionsContainer = document.getElementById('optionsContainer');
-        const checkBtn = document.getElementById('checkBtn');
-        const feedback = document.getElementById('feedback');
-        const scoreElement = document.getElementById('score');
-        const streakElement = document.getElementById('streak');
-        const progressFill = document.getElementById('progressFill');
-        const finalScore = document.getElementById('finalScore');
-        const restartBtn = document.getElementById('restartBtn');
-        const questionLangIndicator = document.getElementById('questionLangIndicator');
-        const questionsList = document.getElementById('questionsList');
-        // Configuração do IndexedDB
+        // IndexedDB Configuration
         let db;
+        const dbName = 'DuolingoGameDB';
+        const dbVersion = 1;
 
-        // Inicializar IndexedDB
+        // Game State
+        let questions = [];
+        let currentQuestion = null;
+        let currentQuestionIndex = 0;
+        let selectedWords = [];
+        let gameStats = {
+            totalQuestions: 0,
+            correctAnswers: 0,
+            totalAnswered: 0
+        };
+        let editingIndex = -1;
+        let usedQuestions = []; // Para controlar perguntas já utilizadas
+
+        // Initialize IndexedDB
         function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open('QuizAppDB', 1);
+            const request = indexedDB.open(dbName, dbVersion);
 
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
+            request.onerror = function (event) {
+                console.error('Database error:', event.target.error);
+            };
 
-                request.onupgradeneeded = (event) => {
-                    db = event.target.result;
-                    if (!db.objectStoreNames.contains('questions')) {
-                        db.createObjectStore('questions', { keyPath: 'id', autoIncrement: true });
-                    }
-                };
-            });
+            request.onsuccess = function (event) {
+                db = event.target.result;
+                loadQuestions();
+                loadStats();
+            };
+
+            request.onupgradeneeded = function (event) {
+                db = event.target.result;
+
+                // Create questions store
+                if (!db.objectStoreNames.contains('questions')) {
+                    const questionsStore = db.createObjectStore('questions', { keyPath: 'id', autoIncrement: true });
+                    questionsStore.createIndex('question', 'question', { unique: false });
+                }
+
+                // Create stats store
+                if (!db.objectStoreNames.contains('stats')) {
+                    const statsStore = db.createObjectStore('stats', { keyPath: 'id' });
+                }
+            };
         }
 
-        // Salvar perguntas no IndexedDB
-        function saveQuestionsDB() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(['questions'], 'readwrite');
-                const store = transaction.objectStore('questions');
+        // Database Operations
+        function saveQuestion(question) {
+            const transaction = db.transaction(['questions'], 'readwrite');
+            const store = transaction.objectStore('questions');
+            store.add(question);
 
-                // Limpar dados existentes
-                store.clear();
+            transaction.oncomplete = function () {
+                loadQuestions();
+            };
+        }
 
-                // Salvar nova estrutura
-                const request = store.add({
-                    id: 1,
-                    data: questionsDatabase
+        function updateQuestion(id, questionData) {
+            const transaction = db.transaction(['questions'], 'readwrite');
+            const store = transaction.objectStore('questions');
+
+            const getRequest = store.get(id);
+            getRequest.onsuccess = function () {
+                const data = getRequest.result;
+                Object.assign(data, questionData);
+
+                const putRequest = store.put(data);
+                putRequest.onsuccess = function () {
+                    loadQuestions();
+                };
+            };
+        }
+
+        function deleteQuestion(id) {
+            const transaction = db.transaction(['questions'], 'readwrite');
+            const store = transaction.objectStore('questions');
+            store.delete(id);
+
+            transaction.oncomplete = function () {
+                loadQuestions();
+            };
+        }
+
+        function loadQuestions() {
+            const transaction = db.transaction(['questions'], 'readonly');
+            const store = transaction.objectStore('questions');
+            const request = store.getAll();
+
+            request.onsuccess = function () {
+                questions = request.result;
+                updateQuestionsList();
+                updateStats();
+            };
+        }
+
+        function saveStats() {
+            const transaction = db.transaction(['stats'], 'readwrite');
+            const store = transaction.objectStore('stats');
+            store.put({ id: 'gameStats', ...gameStats });
+        }
+
+        function loadStats() {
+            const transaction = db.transaction(['stats'], 'readonly');
+            const store = transaction.objectStore('stats');
+            const request = store.get('gameStats');
+
+            request.onsuccess = function () {
+                if (request.result) {
+                    gameStats = { ...gameStats, ...request.result };
+                }
+                updateStatsDisplay();
+            };
+        }
+        // Speech Functions
+        function speakText(text, language = 'pt-BR') {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = language;
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function getLanguageCode(language) {
+            const languages = {
+                'português': 'pt-BR',
+                'inglês': 'en-US',
+                'espanhol': 'es-ES',
+                'francês': 'fr-FR',
+                'italiano': 'it-IT'
+            };
+            return languages[language] || 'pt-BR';
+        }
+        // Game Logic
+        function startGame() {
+            // Se clicar em "Iniciar Jogo" quando já finalizou, resetar
+if (usedQuestions.length === questions.length && questions.length > 0) {
+    usedQuestions = [];
+}
+            if (questions.length === 0) {
+                alert('Adicione algumas perguntas primeiro!');
+                showAdmin();
+                return;
+            }
+
+// Verificar se ainda há perguntas não utilizadas
+const availableQuestions = questions.filter((_, index) => !usedQuestions.includes(index));
+
+if (availableQuestions.length === 0) {
+    // Todas as perguntas foram utilizadas
+    finishGame();
+    return;
+}
+
+// Escolher uma pergunta aleatória das disponíveis
+const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+const selectedQuestion = availableQuestions[randomIndex];
+currentQuestionIndex = questions.indexOf(selectedQuestion);
+currentQuestion = selectedQuestion;
+
+// Marcar esta pergunta como usada
+usedQuestions.push(currentQuestionIndex);
+
+            displayQuestion();
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        function displayQuestion() {
+            document.getElementById('questionText').textContent = currentQuestion.question;
+            // Speak the question
+            if (currentQuestion.questionLanguage) {
+                speakText(currentQuestion.question, getLanguageCode(currentQuestion.questionLanguage));
+            }
+
+            let allItems = [];
+
+            if (currentQuestion.type === 'letters') {
+                // Generate letters for the answer
+                const answerLetters = currentQuestion.answer.toLowerCase()
+                    .split('')
+                    .filter(char => char.match(/[a-záàâãéêíóôõúçñü]/i));
+
+                // Add extra letters if provided
+                const extraLetters = currentQuestion.extraLetters || [];
+
+                // Combine and shuffle
+                allItems = [...answerLetters, ...extraLetters];
+
+                // Add some random letters if we don't have enough
+                const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+                while (allItems.length < Math.max(8, answerLetters.length + 3)) {
+                    const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+                    if (!allItems.includes(randomLetter)) {
+                        allItems.push(randomLetter);
+                    }
+                }
+            } else {
+                // Use words as before
+                allItems = [...currentQuestion.words];
+            }
+
+            shuffleArray(allItems);
+
+            // Display word/letter bank
+            const wordBank = document.getElementById('wordBank');
+            wordBank.innerHTML = '';
+
+            allItems.forEach(item => {
+                const itemChip = document.createElement('button');
+                itemChip.className = currentQuestion.type === 'letters' ? 'word-chip letter' : 'word-chip';
+                itemChip.textContent = item.toUpperCase();
+                itemChip.onclick = () => selectItem(item, itemChip);
+                wordBank.appendChild(itemChip);
+            });
+
+            // Clear answer area
+            clearAnswer();
+
+            // Update progress
+            updateProgress();
+        }
+
+        function selectItem(item, chipElement) {
+            if (chipElement.classList.contains('selected')) {
+                return;
+            }
+
+            selectedWords.push(item);
+            chipElement.classList.add('selected');
+
+            // Add to answer area
+            const answerArea = document.getElementById('answerArea');
+            const answerChip = document.createElement('button');
+            answerChip.className = currentQuestion.type === 'letters' ? 'word-chip letter' : 'word-chip';
+            answerChip.textContent = currentQuestion.type === 'letters' ? item.toUpperCase() : item;
+            answerChip.onclick = () => removeItem(item, answerChip, chipElement);
+            answerArea.appendChild(answerChip);
+
+            // Enable check button if we have items
+            document.getElementById('checkBtn').disabled = selectedWords.length === 0;
+        }
+
+        function removeItem(item, answerChip, originalChip) {
+            const index = selectedWords.indexOf(item);
+            if (index > -1) {
+                selectedWords.splice(index, 1);
+            }
+
+            answerChip.remove();
+            originalChip.classList.remove('selected');
+
+            document.getElementById('checkBtn').disabled = selectedWords.length === 0;
+        }
+
+        function clearAnswer() {
+            selectedWords = [];
+            document.getElementById('answerArea').innerHTML = '';
+            document.getElementById('answerArea').className = 'answer-area';
+
+            // Reset word chips
+            document.querySelectorAll('.word-chip.selected').forEach(chip => {
+                chip.classList.remove('selected');
+            });
+
+            document.getElementById('checkBtn').disabled = true;
+        }
+
+        function checkAnswer() {
+            let userAnswer, correctAnswer;
+
+            if (currentQuestion.type === 'letters') {
+                // For letters, join without spaces and normalize
+                userAnswer = selectedWords.join('').toLowerCase().trim();
+                correctAnswer = currentQuestion.answer.toLowerCase().replace(/\s+/g, '').trim();
+            } else {
+                // For words, join with spaces
+                userAnswer = selectedWords.join(' ').toLowerCase().trim();
+                correctAnswer = currentQuestion.answer.toLowerCase().trim();
+            }
+
+            const feedbackEl = document.getElementById('feedback');
+            const answerArea = document.getElementById('answerArea');
+
+            gameStats.totalAnswered++;
+
+            if (userAnswer === correctAnswer) {
+                feedbackEl.textContent = '🎉 Correto! Muito bem!';
+                feedbackEl.className = 'feedback correct';
+                answerArea.className = 'answer-area correct';
+                gameStats.correctAnswers++;
+                vibrate([50, 100, 50]); // Success vibration pattern
+                // Speak the correct answer
+                if (currentQuestion.answerLanguage) {
+                    setTimeout(() => {
+                        speakText(currentQuestion.answer, getLanguageCode(currentQuestion.answerLanguage));
+                    }, 1000);
+                }
+            } else {
+                feedbackEl.textContent = `❌ Incorreto! A resposta era: "${currentQuestion.answer}"`;
+                feedbackEl.className = 'feedback incorrect';
+                answerArea.className = 'answer-area incorrect';
+                vibrate(200); // Error vibration
+
+                // Falar a resposta correta no idioma certo
+                if (currentQuestion.answerLanguage) {
+                    setTimeout(() => {
+                        speakText(currentQuestion.answer, getLanguageCode(currentQuestion.answerLanguage));
+                    }, 1000);
+                }
+            }
+
+            feedbackEl.style.display = 'block';
+            document.getElementById('checkBtn').disabled = true;
+
+            // Save stats and update display
+            saveStats();
+            updateStatsDisplay();
+
+            // Auto next question after 3 seconds, ou finalizar se não houver mais
+            setTimeout(() => {
+                nextQuestion();
+            }, 3000);
+        }
+
+        function nextQuestion() {//funçao para pular para proxima pergunta
+    startGame(); // Agora startGame() já faz toda a verificação
+}
+
+function finishGame() {
+    document.getElementById('questionText').textContent = '🎉 Parabéns! Você completou todas as perguntas!';
+    document.getElementById('wordBank').innerHTML = '';
+    document.getElementById('answerArea').innerHTML = '';
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('checkBtn').disabled = true;
+    
+    // Mostrar estatísticas finais
+    const accuracy = gameStats.totalAnswered > 0 ? 
+        Math.round((gameStats.correctAnswers / gameStats.totalAnswered) * 100) : 0;
+    
+    setTimeout(() => {
+        alert(`Jogo finalizado!\n\nEstatísticas:\n- Perguntas respondidas: ${gameStats.totalAnswered}\n- Acertos: ${gameStats.correctAnswers}\n- Precisão: ${accuracy}%`);
+    }, 1000);
+    
+    // Resetar para um novo jogo
+    usedQuestions = [];
+}
+
+        // Admin Functions
+        function toggleGameType() {
+            const gameType = document.getElementById('gameType').value;
+            const wordsGroup = document.getElementById('wordsGroup');
+            const lettersGroup = document.getElementById('lettersGroup');
+
+            if (gameType === 'letters') {
+                wordsGroup.style.display = 'none';
+                lettersGroup.style.display = 'block';
+            } else {
+                wordsGroup.style.display = 'block';
+                lettersGroup.style.display = 'none';
+            }
+        }
+
+        function toggleEditGameType() {
+            const gameType = document.getElementById('editGameType').value;
+            const wordsGroup = document.getElementById('editWordsGroup');
+            const lettersGroup = document.getElementById('editLettersGroup');
+
+            if (gameType === 'letters') {
+                wordsGroup.style.display = 'none';
+                lettersGroup.style.display = 'block';
+            } else {
+                wordsGroup.style.display = 'block';
+                lettersGroup.style.display = 'none';
+            }
+        }
+
+        function addQuestion() {
+            const question = document.getElementById('questionInput').value.trim();
+            const answer = document.getElementById('answerInput').value.trim();
+            const gameType = document.getElementById('gameType').value;
+
+            if (!question || !answer) {
+                alert('Por favor, preencha a pergunta e a resposta!');
+                return;
+            }
+
+            let questionObj = {
+                question: question,
+                answer: answer,
+                type: gameType,
+                questionLanguage: document.getElementById('questionLanguage').value,
+                answerLanguage: document.getElementById('answerLanguage').value,
+            };
+
+            if (gameType === 'letters') {
+                const lettersInput = document.getElementById('lettersInput').value.trim();
+                const extraLetters = lettersInput ?
+                    lettersInput.split(',').map(letter => letter.trim().toLowerCase()).filter(letter => letter) : [];
+
+                questionObj.extraLetters = extraLetters;
+            } else {
+                const wordsInput = document.getElementById('wordsInput').value.trim();
+
+                if (!wordsInput) {
+                    alert('Por favor, adicione palavras para escolha!');
+                    return;
+                }
+
+                const words = wordsInput.split(',').map(word => word.trim()).filter(word => word);
+
+                if (words.length < 2) {
+                    alert('Adicione pelo menos 2 palavras para escolha!');
+                    return;
+                }
+
+                // Add answer words to word bank if not present
+                const answerWords = answer.split(' ').filter(word => word.trim());
+                answerWords.forEach(word => {
+                    if (!words.includes(word)) {
+                        words.push(word);
+                    }
                 });
 
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Carregar perguntas do IndexedDB
-        function loadQuestionsDB() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(['questions'], 'readonly');
-                const store = transaction.objectStore('questions');
-                const request = store.get(1);
-
-                request.onsuccess = () => {
-                    if (request.result) {
-                        questionsDatabase = request.result.data;
-                    }
-                    resolve();
-                };
-                request.onerror = () => reject(request.error);
-            });
-        }
-        // Carregar dados do localStorage
-        // Carregar dados do IndexedDB
-        async function loadData() {
-            try {
-                await initDB();
-                await loadQuestionsDB();
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-            }
-        }
-
-        // Salvar dados no localStorage
-        // Salvar dados no IndexedDB
-        async function saveData() {
-            try {
-                await saveQuestionsDB();
-            } catch (error) {
-                console.error('Erro ao salvar dados:', error);
-            }
-        }
-
-        // Função para trocar abas
-        function switchTab(tabName) {
-            // Remover classe active de todas as abas
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            // Ativar aba selecionada
-            event.target.classList.add('active');
-            document.getElementById(tabName + 'Tab').classList.add('active');
-
-            if (tabName === 'manage') {
-                displayQuestionsList();
-            }
-        }
-
-        // Função para inicializar categorias
-        function initializeCategories() {
-            const categories = [
-                { id: 'geral', name: '🌍 Geral', emoji: '🌍' },
-                { id: 'matematica', name: '🔢 Matemática', emoji: '🔢' },
-                { id: 'historia', name: '📚 História', emoji: '📚' },
-                { id: 'ciencias', name: '🔬 Ciências', emoji: '🔬' },
-                { id: 'geografia', name: '🗺️ Geografia', emoji: '🗺️' },
-                { id: 'idiomas', name: '🗣️ Idiomas', emoji: '🗣️' },
-                { id: 'literatura', name: '📖 Literatura', emoji: '📖' },
-                { id: 'tecnologia', name: '💻 Tecnologia', emoji: '💻' }
-            ];
-
-            categoryGrid.innerHTML = '';
-            for (let category of categories) {
-                const count = questionsDatabase[category.id] ? questionsDatabase[category.id].length : 0;
-                const btn = document.createElement('div');
-                btn.className = 'category-btn';
-                btn.innerHTML = `
-                    <div>${category.emoji}</div>
-                    <div style="font-size: 12px; margin-top: 5px;">${category.name.replace(category.emoji + ' ', '')}</div>
-                    <div style="font-size: 10px; color: #666;">${count} perguntas</div>
-                `;
-                btn.onclick = () => selectCategory(category.id);
-                categoryGrid.appendChild(btn);
-            }
-        }
-
-        // Função para selecionar categoria
-        function selectCategory(categoryId) {
-            if (!questionsDatabase[categoryId] || questionsDatabase[categoryId].length === 0) {
-                alert('Esta categoria não possui perguntas ainda. Crie algumas na aba "Criar"!');
-                return;
+                questionObj.words = words;
             }
 
-            currentCategory = categoryId;
-
-            // Destacar categoria selecionada
-            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
-            event.target.classList.add('selected');
-
-            // Mostrar seletor de idioma
-            categorySelector.classList.add('hidden');
-            languageSelector.classList.remove('hidden');
-        }
-
-        // Função para selecionar idioma da pergunta
-        function selectQuestionLang(lang) {
-            questionLang = lang;
-            document.querySelectorAll('[onclick*="selectQuestionLang"]').forEach(btn => btn.classList.remove('selected'));
-            document.querySelector(`[onclick="selectQuestionLang('${lang}')"]`).classList.add('selected');
-        }
-
-        // Função para selecionar idioma da resposta
-        function selectAnswerLang(lang) {
-            answerLang = lang;
-            document.querySelectorAll('[onclick*="selectAnswerLang"]').forEach(btn => btn.classList.remove('selected'));
-            document.querySelector(`[onclick="selectAnswerLang('${lang}')"]`).classList.add('selected');
-        }
-
-        // Função para iniciar quiz
-        function startQuiz() {
-            // Filtrar perguntas pela configuração de idioma
-            currentQuestions = questionsDatabase[currentCategory].filter(q =>
-                q.questionLang === questionLang && q.answerLang === answerLang
-            );
-
-            if (currentQuestions.length === 0) {
-                alert('Não há perguntas para esta combinação de idiomas. Tente outra configuração ou crie novas perguntas!');
-                return;
-            }
-
-            // Embaralhar perguntas
-            currentQuestions = currentQuestions.sort(() => Math.random() - 0.5);
-
-            // Resetar variáveis
-            currentQuestion = 0;
-            score = 0;
-            streak = 0;
-            selectedOption = -1;
-
-            // Mostrar elementos do quiz
-            languageSelector.classList.add('hidden');
-            quizHeader.classList.remove('hidden');
-            questionCard.classList.remove('hidden');
-
-            // Atualizar indicadores
-            scoreElement.textContent = '0';
-            streakElement.textContent = '0';
-
-            loadQuestion();
-        }
-
-        // Função para carregar uma pergunta
-        function loadQuestion() {
-            if (currentQuestion >= currentQuestions.length) {
-                showCompletionScreen();
-                return;
-            }
-
-            const question = currentQuestions[currentQuestion];
-            questionText.textContent = question.question;
-
-            // Atualizar indicador de idioma
-            const langText = question.questionLang === 'pt' ? '🇧🇷 Português' : '🇺🇸 Inglês';
-            questionLangIndicator.textContent = langText;
-
-            // Limpar opções anteriores
-            optionsContainer.innerHTML = '';
-
-            // Criar opções
-            for (let i = 0; i < question.options.length; i++) {
-                const option = document.createElement('div');
-                option.className = 'option';
-                option.innerHTML = `
-                    <span>${question.options[i]}</span>
-                    <button class="option-audio" onclick="playOptionAudio('${question.options[i]}', '${question.answerLang}', event)">🔊</button>
-                `;
-                option.onclick = function (e) {
-                    if (e.target.classList.contains('option-audio')) return;
-                    selectOption(i);
-                };
-                optionsContainer.appendChild(option);
-            }
-
-            // Resetar estado
-            selectedOption = -1;
-            checkBtn.disabled = true;
-            checkBtn.textContent = 'VERIFICAR';
-            feedback.className = 'feedback hidden';
-
-            // Atualizar barra de progresso
-            const progress = (currentQuestion / currentQuestions.length) * 100;
-            progressFill.style.width = progress + '%';
-        }
-
-        // Função para selecionar uma opção
-        function selectOption(index) {
-            selectedOption = index;
-
-            // Remover seleção anterior
-            const options = document.querySelectorAll('.option');
-            for (let i = 0; i < options.length; i++) {
-                options[i].classList.remove('selected');
-            }
-
-            // Adicionar seleção atual
-            options[index].classList.add('selected');
-            checkBtn.disabled = false;
-        }
-
-        // Função para verificar resposta
-        function checkAnswer() {
-            if (selectedOption === -1) return;
-
-            const question = currentQuestions[currentQuestion];
-            const options = document.querySelectorAll('.option');
-            const isCorrect = selectedOption === question.correct;
-
-            // Mostrar resultado visual
-            for (let i = 0; i < options.length; i++) {
-                if (i === question.correct) {
-                    options[i].classList.add('correct');
-                } else if (i === selectedOption && !isCorrect) {
-                    options[i].classList.add('incorrect');
-                }
-            }
-
-            // Mostrar feedback
-            feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
-
-            if (isCorrect) {
-                feedback.textContent = '🎉 Correto! Muito bem!';
-                score += 10;
-                streak += 1;
-                // Áudio de sucesso
-                playFeedbackAudio('Correto! Muito bem!', 'pt');
-            } else {
-                feedback.textContent = '❌ Incorreto. A resposta certa é: ' + question.options[question.correct];
-                streak = 0;
-                // Áudio de erro
-                playFeedbackAudio('Incorreto. A resposta correta é ' + question.options[question.correct], questionLang);
-            }
-
-            // Atualizar pontuação e sequência
-            scoreElement.textContent = score;
-            streakElement.textContent = streak;
-
-            // Mudar botão para próxima
-            checkBtn.textContent = currentQuestion === currentQuestions.length - 1 ? 'FINALIZAR' : 'PRÓXIMA';
-            checkBtn.onclick = nextQuestion;
-        }
-
-        // Função para próxima pergunta
-        function nextQuestion() {
-            currentQuestion += 1;
-            checkBtn.onclick = checkAnswer;
-            loadQuestion();
-        }
-
-        // Função para mostrar tela de conclusão
-        function showCompletionScreen() {
-            questionCard.classList.add('hidden');
-            completionScreen.classList.remove('hidden');
-
-            const percentage = Math.round((score / (currentQuestions.length * 10)) * 100);
-            finalScore.innerHTML = `
-                <div>Pontuação Final: ${score}/${currentQuestions.length * 10}</div>
-                <div>Aproveitamento: ${percentage}%</div>
-                <div>Maior Sequência: ${streak}</div>
-            `;
-
-            // Atualizar barra de progresso para 100%
-            progressFill.style.width = '100%';
-
-            // Áudio de conclusão
-            let completionMsg = '';
-            if (percentage >= 80) {
-                completionMsg = 'Parabéns! Excelente desempenho!';
-            } else if (percentage >= 60) {
-                completionMsg = 'Bom trabalho! Continue praticando!';
-            } else {
-                completionMsg = 'Continue estudando para melhorar!';
-            }
-            playFeedbackAudio(completionMsg, 'pt');
-        }
-
-        // Função para reiniciar o jogo
-        function restartGame() {
-            currentQuestion = 0;
-            score = 0;
-            streak = 0;
-            selectedOption = -1;
-
-            scoreElement.textContent = '0';
-            streakElement.textContent = '0';
-
-            questionCard.classList.remove('hidden');
-            completionScreen.classList.add('hidden');
-
-            // Embaralhar perguntas novamente
-            currentQuestions = currentQuestions.sort(() => Math.random() - 0.5);
-
-            loadQuestion();
-        }
-
-        // Função para voltar às categorias
-        function goToCategories() {
-            completionScreen.classList.add('hidden');
-            quizHeader.classList.add('hidden');
-            categorySelector.classList.remove('hidden');
-
-            // Limpar seleções
-            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
-        }
-
-        // Função para tocar áudio da pergunta
-        function playQuestionAudio() {
-            const question = currentQuestions[currentQuestion];
-            playTextToSpeech(question.question, question.questionLang);
-        }
-
-        // Função para tocar áudio da opção
-        function playOptionAudio(text, lang, event) {
-            event.stopPropagation();
-            playTextToSpeech(text, lang);
-        }
-
-        // Função para tocar áudio de feedback
-        function playFeedbackAudio(text, lang) {
-            setTimeout(() => {
-                playTextToSpeech(text, lang);
-            }, 500);
-        }
-
-        // Função Text-to-Speech
-        function playTextToSpeech(text, lang) {
-            if (speechSynthesis.speaking) {
-                speechSynthesis.cancel();
-            }
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang === 'pt' ? 'pt-BR' : 'en-US';
-            utterance.rate = 0.8;
-            utterance.pitch = 1;
-
-            speechSynthesis.speak(utterance);
-        }
-
-        // Função para adicionar nova pergunta
-        function addNewQuestion() {
-            const category = document.getElementById('newQuestionCategory').value;
-            const questionLang = document.getElementById('newQuestionLang').value;
-            const questionText = document.getElementById('newQuestionText').value.trim();
-            const option1 = document.getElementById('option1').value.trim();
-            const option2 = document.getElementById('option2').value.trim();
-            const option3 = document.getElementById('option3').value.trim();
-            const option4 = document.getElementById('option4').value.trim();
-            const correct = parseInt(document.getElementById('correctAnswer').value);
-            const answerLang = document.getElementById('newAnswerLang').value;
-
-            // Validação
-            if (!questionText || !option1 || !option2 || !option3 || !option4) {
-                alert('Por favor, preencha todos os campos!');
-                return;
-            }
-
-            // Criar pergunta
-            const newQuestion = {
-                question: questionText,
-                options: [option1, option2, option3, option4],
-                correct: correct,
-                questionLang: questionLang,
-                answerLang: answerLang
-            };
-
-            // Adicionar à base de dados
-            if (!questionsDatabase[category]) {
-                questionsDatabase[category] = [];
-            }
-
-            questionsDatabase[category].push(newQuestion);
-            saveData();
-
-            // Limpar formulário
+            saveQuestion(questionObj);
             clearForm();
-
-            // Atualizar contador de perguntas
-            initializeCategories();
-
-            alert('Pergunta adicionada com sucesso!');
         }
 
-        // Função para exibir lista de perguntas
-        function displayQuestionsList() {
-            questionsList.innerHTML = '';
-
-            for (let category in questionsDatabase) {
-                if (questionsDatabase[category].length > 0) {
-                    const categorySection = document.createElement('div');
-                    categorySection.innerHTML = `<h3 style="margin: 20px 0 10px 0; color: #1cb0f6; text-transform: capitalize;">${category}</h3>`;
-                    questionsList.appendChild(categorySection);
-
-                    for (let i = 0; i < questionsDatabase[category].length; i++) {
-                        const question = questionsDatabase[category][i];
-                        const questionItem = document.createElement('div');
-                        questionItem.className = 'question-item';
-                        questionItem.innerHTML = `
-                            <button class="question-delete" onclick="deleteQuestion('${category}', ${i})">❌</button>
-                            <button class="question-edit" onclick="editQuestion('${category}', ${i})">✏️</button>
-                            <div style="margin-bottom: 10px;"><strong>Pergunta (${question.questionLang}):</strong> ${question.question}</div>
-                            <div style="margin-bottom: 10px;"><strong>Respostas (${question.answerLang}):</strong></div>
-                            <div style="margin-left: 15px;">
-                                ${question.options.map((opt, idx) =>
-                            `<div style="color: ${idx === question.correct ? '#58cc02' : '#666'};">
-                                        ${idx === question.correct ? '✓' : '•'} ${opt}
-                                    </div>`
-                        ).join('')}
-                            </div>
-                        `;
-                        questionsList.appendChild(questionItem);
-                    }
-                }
-            }
-
-            if (questionsList.innerHTML === '') {
-                questionsList.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Nenhuma pergunta cadastrada ainda.</div>';
-            }
-        }
-
-        // Função para deletar pergunta
-        function deleteQuestion(category, index) {
-            if (confirm('Tem certeza que deseja deletar esta pergunta?')) {
-                questionsDatabase[category].splice(index, 1);
-
-                // Remover categoria vazia
-                if (questionsDatabase[category].length === 0) {
-                    delete questionsDatabase[category];
-                }
-
-                saveData();
-                displayQuestionsList();
-                initializeCategories();
-            }
-        }
-        // Função para editar pergunta
-        function editQuestion(category, index) {
-            const question = questionsDatabase[category][index];
-
-            // Preencher formulário com dados da pergunta
-            document.getElementById('newQuestionCategory').value = category;
-            document.getElementById('newQuestionLang').value = question.questionLang;
-            document.getElementById('newQuestionText').value = question.question;
-            document.getElementById('option1').value = question.options[0];
-            document.getElementById('option2').value = question.options[1];
-            document.getElementById('option3').value = question.options[2];
-            document.getElementById('option4').value = question.options[3];
-            document.getElementById('correctAnswer').value = question.correct;
-            document.getElementById('newAnswerLang').value = question.answerLang;
-
-            // Trocar para aba de criar
-            switchTab('create');
-            document.querySelector('[onclick="switchTab(\'create\')"]').click();
-
-            // Mudar comportamento do botão
-            const addBtn = document.querySelector('.add-question-btn');
-            addBtn.textContent = 'SALVAR ALTERAÇÕES';
-            addBtn.onclick = () => saveEditedQuestion(category, index);
-        }
-
-        // Função para salvar pergunta editada
-        function saveEditedQuestion(category, index) {
-            const questionLang = document.getElementById('newQuestionLang').value;
-            const questionText = document.getElementById('newQuestionText').value.trim();
-            const option1 = document.getElementById('option1').value.trim();
-            const option2 = document.getElementById('option2').value.trim();
-            const option3 = document.getElementById('option3').value.trim();
-            const option4 = document.getElementById('option4').value.trim();
-            const correct = parseInt(document.getElementById('correctAnswer').value);
-            const answerLang = document.getElementById('newAnswerLang').value;
-
-            // Validação
-            if (!questionText || !option1 || !option2 || !option3 || !option4) {
-                alert('Por favor, preencha todos os campos!');
-                return;
-            }
-
-            // Atualizar pergunta
-            questionsDatabase[category][index] = {
-                question: questionText,
-                options: [option1, option2, option3, option4],
-                correct: correct,
-                questionLang: questionLang,
-                answerLang: answerLang
-            };
-
-            saveData();
-
-            // Limpar formulário e restaurar botão
-            clearForm();
-            alert('Pergunta atualizada com sucesso!');
-
-            // Atualizar displays
-            initializeCategories();
-            displayQuestionsList();
-        }
-        // Função para limpar formulário
         function clearForm() {
-            document.getElementById('newQuestionText').value = '';
-            document.getElementById('option1').value = '';
-            document.getElementById('option2').value = '';
-            document.getElementById('option3').value = '';
-            document.getElementById('option4').value = '';
-
-            // Restaurar botão original
-            const addBtn = document.querySelector('.add-question-btn');
-            addBtn.textContent = 'ADICIONAR PERGUNTA';
-            addBtn.onclick = addNewQuestion;
+            document.getElementById('questionInput').value = '';
+            document.getElementById('answerInput').value = '';
+            document.getElementById('wordsInput').value = '';
+            document.getElementById('lettersInput').value = '';
+            document.getElementById('gameType').value = 'words';
+            document.getElementById('questionLanguage').value = 'português';
+            document.getElementById('answerLanguage').value = 'inglês';
+            toggleGameType();
         }
-        // Função para exportar perguntas
+
+        function updateQuestionsList() {
+            const list = document.getElementById('questionsList');
+            list.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const item = document.createElement('div');
+                item.className = 'question-item';
+
+                const typeIcon = q.type === 'letters' ? '🔤' : '📝';
+                const extraInfo = q.type === 'letters' ?
+                    (q.extraLetters && q.extraLetters.length > 0 ?
+                        `<small><strong>Letras extras:</strong> ${q.extraLetters.join(', ')}</small>` :
+                        '<small><strong>Tipo:</strong> Apenas letras da resposta</small>') :
+                    `<small><strong>Palavras:</strong> ${q.words.join(', ')}</small>`;
+
+                item.innerHTML = `
+                    <div class="question-content">
+                        ${typeIcon} <strong>P:</strong> ${q.question}<br>
+                        <strong>R:</strong> ${q.answer}<br>
+                        ${extraInfo}
+                    </div>
+                    <div class="question-actions">
+                        <button class="btn-small btn-edit" onclick="editQuestion(${q.id})">✏️</button>
+                        <button class="btn-small btn-delete" onclick="deleteQuestionConfirm(${q.id})">🗑️</button>
+                    </div>
+                `;
+
+                list.appendChild(item);
+            });
+        }
+
+        function editQuestion(id) {
+            const question = questions.find(q => q.id === id);
+            if (!question) return;
+
+            editingIndex = id;
+            document.getElementById('editQuestion').value = question.question;
+            document.getElementById('editAnswer').value = question.answer;
+
+            // Set game type
+            document.getElementById('editGameType').value = question.type || 'words';
+            toggleEditGameType();
+
+            if (question.type === 'letters') {
+                document.getElementById('editLetters').value = (question.extraLetters || []).join(', ');
+            } else {
+                document.getElementById('editWords').value = (question.words || []).join(', ');
+            }
+
+            document.getElementById('editModal').classList.add('active');
+            document.getElementById('editQuestionLanguage').value = question.questionLanguage || 'português';
+            document.getElementById('editAnswerLanguage').value = question.answerLanguage || 'inglês';
+        }
+
+        function saveEdit() {
+            const question = document.getElementById('editQuestion').value.trim();
+            const answer = document.getElementById('editAnswer').value.trim();
+            const gameType = document.getElementById('editGameType').value;
+
+            if (!question || !answer) {
+                alert('Por favor, preencha a pergunta e a resposta!');
+                return;
+            }
+
+            let questionData = {
+                question: question,
+                answer: answer,
+                type: gameType,
+                questionLanguage: document.getElementById('editQuestionLanguage').value,
+                answerLanguage: document.getElementById('editAnswerLanguage').value,
+            };
+
+            if (gameType === 'letters') {
+                const lettersInput = document.getElementById('editLetters').value.trim();
+                const extraLetters = lettersInput ?
+                    lettersInput.split(',').map(letter => letter.trim().toLowerCase()).filter(letter => letter) : [];
+
+                questionData.extraLetters = extraLetters;
+            } else {
+                const wordsInput = document.getElementById('editWords').value.trim();
+
+                if (!wordsInput) {
+                    alert('Por favor, adicione palavras para escolha!');
+                    return;
+                }
+
+                const words = wordsInput.split(',').map(word => word.trim()).filter(word => word);
+
+                if (words.length < 2) {
+                    alert('Adicione pelo menos 2 palavras para escolha!');
+                    return;
+                }
+
+                // Add answer words to word bank if not present
+                const answerWords = answer.split(' ').filter(word => word.trim());
+                answerWords.forEach(word => {
+                    if (!words.includes(word)) {
+                        words.push(word);
+                    }
+                });
+
+                questionData.words = words;
+            }
+
+            updateQuestion(editingIndex, questionData);
+            closeEditModal();
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            editingIndex = -1;
+        }
+
+        function deleteQuestionConfirm(id) {
+            if (confirm('Tem certeza que deseja excluir esta pergunta?')) {
+                deleteQuestion(id);
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Tem certeza que deseja excluir TODAS as perguntas e estatísticas? Esta ação não pode ser desfeita!')) {
+                const transaction = db.transaction(['questions', 'stats'], 'readwrite');
+
+                transaction.objectStore('questions').clear();
+                transaction.objectStore('stats').clear();
+
+                transaction.oncomplete = function () {
+                    questions = [];
+                    gameStats = {
+                        totalQuestions: 0,
+                        correctAnswers: 0,
+                        totalAnswered: 0
+                    };
+                    updateQuestionsList();
+                    updateStatsDisplay();
+                    alert('Todos os dados foram excluídos!');
+                };
+            }
+        }
+
+        // Import/Export Functions
         function exportQuestions() {
-            const dataStr = JSON.stringify(questionsDatabase, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            if (questions.length === 0) {
+                alert('Não há perguntas para exportar!');
+                return;
+            }
 
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = 'quiz-perguntas.json';
-            link.click();
+            const data = {
+                questions: questions,
+                stats: gameStats,
+                exportDate: new Date().toISOString()
+            };
 
-            URL.revokeObjectURL(link.href);
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `jogo_educativo_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
-        // Função para importar perguntas
         function importQuestions(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1358,39 +1265,246 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
+                    const data = JSON.parse(e.target.result);
 
-                    // Validar estrutura dos dados
-                    if (typeof importedData !== 'object') {
-                        throw new Error('Formato inválido');
+                    if (!data.questions || !Array.isArray(data.questions)) {
+                        alert('Arquivo inválido! Certifique-se de que é um arquivo de exportação válido.');
+                        return;
                     }
 
-                    // Confirmar importação
-                    const totalQuestions = Object.values(importedData).reduce((sum, category) => sum + (Array.isArray(category) ? category.length : 0), 0);
+                    if (confirm(`Importar ${data.questions.length} perguntas? Isso adicionará às perguntas existentes.`)) {
+                        // Import questions
+                        const transaction = db.transaction(['questions'], 'readwrite');
+                        const store = transaction.objectStore('questions');
 
-                    if (confirm(`Importar ${totalQuestions} perguntas? Isso substituirá todas as perguntas existentes.`)) {
-                        questionsDatabase = importedData;
-                        saveData();
-                        initializeCategories();
-                        displayQuestionsList();
-                        alert('Perguntas importadas com sucesso!');
+                        data.questions.forEach(question => {
+                            // Remove id to avoid conflicts
+                            const { id, ...questionData } = question;
+                            store.add(questionData);
+                        });
+
+                        transaction.oncomplete = function () {
+                            loadQuestions();
+                            alert('Perguntas importadas com sucesso!');
+                        };
                     }
                 } catch (error) {
-                    alert('Erro ao importar arquivo. Verifique se o formato está correto.');
+                    alert('Erro ao ler o arquivo! Certifique-se de que é um arquivo JSON válido.');
+                    console.error('Import error:', error);
                 }
             };
-
             reader.readAsText(file);
-            event.target.value = ''; // Limpar input
+
+            // Clear the input
+            event.target.value = '';
         }
 
-        // Event listeners
-        checkBtn.onclick = checkAnswer;
-        restartBtn.onclick = restartGame;
+        // Navigation Functions
+        function showGame() {
+            document.getElementById('gamePanel').style.display = 'block';
+            document.getElementById('adminPanel').classList.remove('active');
 
-        // Inicialização
-        loadData().then(() => {
-            initializeCategories();
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-btn')[0].classList.add('active');
+        }
+
+        function showAdmin() {
+            document.getElementById('gamePanel').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-btn')[1].classList.add('active');
+        }
+
+        // Utility Functions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function updateProgress() {
+            // Simple progress based on question index
+            const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateStats() {
+            gameStats.totalQuestions = questions.length;
+            updateStatsDisplay();
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('totalQuestions').textContent = gameStats.totalQuestions;
+            document.getElementById('correctAnswers').textContent = gameStats.correctAnswers;
+
+            const accuracy = gameStats.totalAnswered > 0 ?
+                Math.round((gameStats.correctAnswers / gameStats.totalAnswered) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        // Keyboard Support
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !document.getElementById('checkBtn').disabled) {
+                checkAnswer();
+            } else if (e.key === 'Escape') {
+                clearAnswer();
+            }
+        });
+
+        // Touch Support for Mobile
+        document.addEventListener('touchstart', function (e) {
+            // Prevent zoom on double tap
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        });
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function () {
+            initDB();
+
+            // Add some sample questions if none exist
+            setTimeout(() => {
+                if (questions.length === 0) {
+                    const sampleQuestions = [
+                        {
+                            question: "Como se diz 'olá' em inglês?",
+                            answer: "hello",
+                            type: "words",
+                            words: ["hello", "goodbye", "please", "thank", "you"]
+                        },
+                        {
+                            question: "Complete: 'The cat is ___'",
+                            answer: "sleeping",
+                            type: "words",
+                            words: ["sleeping", "running", "eating", "playing", "jumping"]
+                        },
+                        {
+                            question: "Forme a palavra: 'GATO'",
+                            answer: "gato",
+                            type: "letters",
+                            extraLetters: ["b", "c", "d", "f", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "v", "w", "x", "y", "z"]
+                        },
+                        {
+                            question: "Forme a palavra: 'CASA'",
+                            answer: "casa",
+                            type: "letters",
+                            extraLetters: ["b", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "t", "u", "v", "w", "x", "y", "z"]
+                        },
+                        {
+                            question: "Complete: 'Eu _____ estudar'",
+                            answer: "gosto de",
+                            type: "words",
+                            words: ["gosto", "de", "não", "quero", "vou"]
+                        },
+                        {
+                            question: "Forme a palavra: 'AMOR'",
+                            answer: "amor",
+                            type: "letters",
+                            extraLetters: ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "n", "p", "q", "s", "t", "u", "v", "w", "x", "y", "z"]
+                        }
+                    ];
+
+                    const transaction = db.transaction(['questions'], 'readwrite');
+                    const store = transaction.objectStore('questions');
+
+                    sampleQuestions.forEach(question => {
+                        store.add(question);
+                    });
+
+                    transaction.oncomplete = function () {
+                        loadQuestions();
+                    };
+                }
+            }, 1000);
+        });
+
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').then(function (registration) {
+                    console.log('ServiceWorker registration successful');
+                }).catch(function (err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
+        // Prevent context menu on long press (mobile)
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        });
+
+        // Add haptic feedback for mobile
+        function vibrate(pattern = 50) {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        // Add vibration to button clicks
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('word-chip') || e.target.classList.contains('game-btn')) {
+                vibrate(30);
+            }
+        });
+
+        // Auto-save feature
+        let autoSaveInterval;
+        function startAutoSave() {
+            autoSaveInterval = setInterval(() => {
+                saveStats();
+            }, 30000); // Save every 30 seconds
+        }
+
+        function stopAutoSave() {
+            if (autoSaveInterval) {
+                clearInterval(autoSaveInterval);
+            }
+        }
+
+        // Start auto-save when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            startAutoSave();
+        });
+
+        // Save before page unload
+        window.addEventListener('beforeunload', function () {
+            saveStats();
+            stopAutoSave();
+        });
+
+        // Add smooth scrolling for mobile
+        document.documentElement.style.scrollBehavior = 'smooth';
+
+        // Handle screen orientation changes
+        window.addEventListener('orientationchange', function () {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+
+        // Add loading indicator
+        function showLoading() {
+            document.body.style.cursor = 'wait';
+        }
+
+        function hideLoading() {
+            document.body.style.cursor = 'default';
+        }
+
+        // Enhanced error handling
+        window.addEventListener('error', function (e) {
+            console.error('Application error:', e.error);
+            alert('Ocorreu um erro inesperado. Tente recarregar a página.');
+        });
+
+        // Database error handling
+        window.addEventListener('unhandledrejection', function (e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            alert('Erro de banco de dados. Verifique se o navegador suporta IndexedDB.');
         });
     </script>
 </body>
