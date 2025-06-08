@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo Educativo</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Jogo Línguas">
     <style>
         * {
             margin: 0;
@@ -571,9 +576,8 @@
                     <label for="lettersInput">Letras extras (opcional - separadas por vírgula):</label>
                     <textarea id="lettersInput" rows="2" placeholder="a, b, c, x, y, z, ..."></textarea>
                     <small style="color: #666; margin-top: 5px; display: block;">
-                        As letras da resposta são incluídas automaticamente. Adicione letras extras para aumentar a
-                        dificuldade.
-                    </small>
+                        Adicione letras extras para aumentar a dificuldade. Sem letras extras, apenas as letras da
+                        resposta aparecerão.</small>
                 </div>
 
                 <div class="game-buttons">
@@ -638,7 +642,9 @@
 
             <div class="form-group" id="editLettersGroup" style="display: none;">
                 <label for="editLetters">Letras extras (separadas por vírgula):</label>
-                <textarea id="editLetters" rows="2"></textarea>
+                <textarea placeholder="Ex: a, b, c" id="editLetters" rows="2"></textarea>
+                Adicione letras extras para aumentar a dificuldade. Sem letras extras, apenas as letras da
+                        resposta aparecerão.</small>
             </div>
 
             <div class="game-buttons">
@@ -665,7 +671,7 @@
             totalAnswered: 0
         };
         let editingIndex = -1;
-        let usedQuestions = []; // Para controlar perguntas já utilizadas
+        let remainingQuestions = []; //1 Array para controlar perguntas não respondidas
 
         // Initialize IndexedDB
         function initDB() {
@@ -767,12 +773,20 @@
         // Speech Functions
         function speakText(text, language = 'pt-BR') {
             if ('speechSynthesis' in window) {
+                // Para mobile, precisa ser ativado por interação do usuário
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = language;
                 utterance.rate = 0.8;
+                utterance.volume = 1.0;
+
+                // Garantir que o speechSynthesis está pronto
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
+
                 speechSynthesis.speak(utterance);
             }
-        }
+        }//1
 
         function getLanguageCode(language) {
             const languages = {
@@ -786,43 +800,33 @@
         }
         // Game Logic
         function startGame() {
-            // Se clicar em "Iniciar Jogo" quando já finalizou, resetar
-if (usedQuestions.length === questions.length && questions.length > 0) {
-    usedQuestions = [];
-}
             if (questions.length === 0) {
                 alert('Adicione algumas perguntas primeiro!');
                 showAdmin();
                 return;
             }
 
-// Verificar se ainda há perguntas não utilizadas
-const availableQuestions = questions.filter((_, index) => !usedQuestions.includes(index));
+            // Se não há perguntas restantes, reiniciar com todas as perguntas
+            if (remainingQuestions.length === 0) {
+                remainingQuestions = [...questions.map((q, index) => index)]; // Cria array com índices
+                shuffleArray(remainingQuestions); // Embaralha as perguntas
+            }
 
-if (availableQuestions.length === 0) {
-    // Todas as perguntas foram utilizadas
-    finishGame();
-    return;
-}
-
-// Escolher uma pergunta aleatória das disponíveis
-const randomIndex = Math.floor(Math.random() * availableQuestions.length);
-const selectedQuestion = availableQuestions[randomIndex];
-currentQuestionIndex = questions.indexOf(selectedQuestion);
-currentQuestion = selectedQuestion;
-
-// Marcar esta pergunta como usada
-usedQuestions.push(currentQuestionIndex);
+            // Pega a próxima pergunta da lista embaralhada
+            currentQuestionIndex = remainingQuestions.shift(); // Remove e retorna o primeiro item
+            currentQuestion = questions[currentQuestionIndex];
 
             displayQuestion();
             document.getElementById('feedback').style.display = 'none';
-        }
+        }//2
 
         function displayQuestion() {
             document.getElementById('questionText').textContent = currentQuestion.question;
             // Speak the question
             if (currentQuestion.questionLanguage) {
-                speakText(currentQuestion.question, getLanguageCode(currentQuestion.questionLanguage));
+                setTimeout(() => {
+                    speakText(currentQuestion.question, getLanguageCode(currentQuestion.questionLanguage));
+                }, 500);//2
             }
 
             let allItems = [];
@@ -836,17 +840,8 @@ usedQuestions.push(currentQuestionIndex);
                 // Add extra letters if provided
                 const extraLetters = currentQuestion.extraLetters || [];
 
-                // Combine and shuffle
+                // Combine and shuffle - APENAS letras da resposta + extras manuais
                 allItems = [...answerLetters, ...extraLetters];
-
-                // Add some random letters if we don't have enough
-                const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
-                while (allItems.length < Math.max(8, answerLetters.length + 3)) {
-                    const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
-                    if (!allItems.includes(randomLetter)) {
-                        allItems.push(randomLetter);
-                    }
-                }
             } else {
                 // Use words as before
                 allItems = [...currentQuestion.words];
@@ -941,7 +936,6 @@ usedQuestions.push(currentQuestionIndex);
                 feedbackEl.className = 'feedback correct';
                 answerArea.className = 'answer-area correct';
                 gameStats.correctAnswers++;
-                vibrate([50, 100, 50]); // Success vibration pattern
                 // Speak the correct answer
                 if (currentQuestion.answerLanguage) {
                     setTimeout(() => {
@@ -952,7 +946,6 @@ usedQuestions.push(currentQuestionIndex);
                 feedbackEl.textContent = `❌ Incorreto! A resposta era: "${currentQuestion.answer}"`;
                 feedbackEl.className = 'feedback incorrect';
                 answerArea.className = 'answer-area incorrect';
-                vibrate(200); // Error vibration
 
                 // Falar a resposta correta no idioma certo
                 if (currentQuestion.answerLanguage) {
@@ -976,27 +969,27 @@ usedQuestions.push(currentQuestionIndex);
         }
 
         function nextQuestion() {//funçao para pular para proxima pergunta
-    startGame(); // Agora startGame() já faz toda a verificação
-}
+            // Verificar se ainda há perguntas restantes
+            if (remainingQuestions.length === 0) {
+                // Finalizar jogo - todas as perguntas foram respondidas
+                document.getElementById('questionText').textContent = '🎉 Parabéns! Você completou todas as perguntas!';
+                document.getElementById('wordBank').innerHTML = '';
+                document.getElementById('answerArea').innerHTML = '';
+                document.getElementById('feedback').style.display = 'none';
+                document.getElementById('checkBtn').disabled = true;
 
-function finishGame() {
-    document.getElementById('questionText').textContent = '🎉 Parabéns! Você completou todas as perguntas!';
-    document.getElementById('wordBank').innerHTML = '';
-    document.getElementById('answerArea').innerHTML = '';
-    document.getElementById('feedback').style.display = 'none';
-    document.getElementById('checkBtn').disabled = true;
-    
-    // Mostrar estatísticas finais
-    const accuracy = gameStats.totalAnswered > 0 ? 
-        Math.round((gameStats.correctAnswers / gameStats.totalAnswered) * 100) : 0;
-    
-    setTimeout(() => {
-        alert(`Jogo finalizado!\n\nEstatísticas:\n- Perguntas respondidas: ${gameStats.totalAnswered}\n- Acertos: ${gameStats.correctAnswers}\n- Precisão: ${accuracy}%`);
-    }, 1000);
-    
-    // Resetar para um novo jogo
-    usedQuestions = [];
-}
+                // Mostrar opção para jogar novamente
+                setTimeout(() => {
+                    if (confirm('Quer jogar novamente?')) {
+                        startGame();
+                    }
+                }, 2000);
+                return;
+            }
+
+            // Continuar para próxima pergunta
+            startGame();
+        }//3
 
         // Admin Functions
         function toggleGameType() {
@@ -1325,10 +1318,14 @@ function finishGame() {
         }
 
         function updateProgress() {
-            // Simple progress based on question index
-            const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
+            if (questions.length === 0) return;
+
+            const totalQuestions = questions.length;
+            const questionsAnswered = totalQuestions - remainingQuestions.length;
+            const progress = (questionsAnswered / totalQuestions) * 100;
+
             document.getElementById('progressBar').style.width = progress + '%';
-        }
+        }//4
 
         function updateStats() {
             gameStats.totalQuestions = questions.length;
@@ -1376,34 +1373,10 @@ function finishGame() {
                             words: ["hello", "goodbye", "please", "thank", "you"]
                         },
                         {
-                            question: "Complete: 'The cat is ___'",
-                            answer: "sleeping",
-                            type: "words",
-                            words: ["sleeping", "running", "eating", "playing", "jumping"]
-                        },
-                        {
                             question: "Forme a palavra: 'GATO'",
                             answer: "gato",
                             type: "letters",
-                            extraLetters: ["b", "c", "d", "f", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "v", "w", "x", "y", "z"]
-                        },
-                        {
-                            question: "Forme a palavra: 'CASA'",
-                            answer: "casa",
-                            type: "letters",
-                            extraLetters: ["b", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "t", "u", "v", "w", "x", "y", "z"]
-                        },
-                        {
-                            question: "Complete: 'Eu _____ estudar'",
-                            answer: "gosto de",
-                            type: "words",
-                            words: ["gosto", "de", "não", "quero", "vou"]
-                        },
-                        {
-                            question: "Forme a palavra: 'AMOR'",
-                            answer: "amor",
-                            type: "letters",
-                            extraLetters: ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "n", "p", "q", "s", "t", "u", "v", "w", "x", "y", "z"]
+                            extraLetters: []
                         }
                     ];
 
@@ -1424,7 +1397,7 @@ function finishGame() {
         // Service Worker Registration for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
-                navigator.serviceWorker.register('/sw.js').then(function (registration) {
+                navigator.serviceWorker.register('/lingua/sw.js').then(function (registration) {
                     console.log('ServiceWorker registration successful');
                 }).catch(function (err) {
                     console.log('ServiceWorker registration failed: ', err);
@@ -1435,20 +1408,6 @@ function finishGame() {
         // Prevent context menu on long press (mobile)
         document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
-        });
-
-        // Add haptic feedback for mobile
-        function vibrate(pattern = 50) {
-            if ('vibrate' in navigator) {
-                navigator.vibrate(pattern);
-            }
-        }
-
-        // Add vibration to button clicks
-        document.addEventListener('click', function (e) {
-            if (e.target.classList.contains('word-chip') || e.target.classList.contains('game-btn')) {
-                vibrate(30);
-            }
         });
 
         // Auto-save feature
